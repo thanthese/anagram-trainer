@@ -27,21 +27,30 @@
 
 ;; find anagrams
 
-(defn anagrams
-  "Return lists of words that are anagrams of each other."
-  [words]
-  (filter (fn [ls] (> (count ls) 1))
-          (vals (reduce (fn [acc w]
-                          (let [k (str/join (sort w))]
-                            (assoc acc k (cons w (acc k)))))
-                        {}
-                        words))))
+(defn register-word [m word]
+  (let [k (str/join (sort word))]
+    (assoc m k (cons word (m k)))))
 
-(deftest test-anagrams
+(defn anagram-map [words]
+  (reduce register-word {} words))
+
+(defn anagrams [words]
+  (filter (fn [ls] (> (count ls) 1))
+          (vals (anagram-map words))))
+
+(deftest
+  test-anagrammap
+  (let [m (anagram-map ["aa" "ab" "ba" "cab" "bac" "bca"])]
+    (is (= (get m "aa")
+           ["aa"]))
+    (is (= (set (get m "ab"))
+           #{"ab" "ba"}))))
+
+(deftest
+  test-anagrams
   (let [as (anagrams ["aa" "ab" "ba" "cab" "bac" "bca"])]
     (is (= (set (map set as))
            #{#{"bca" "bac" "cab"} #{"ba" "ab"}}))))
-
 
 ;; main
 
