@@ -18,9 +18,11 @@
    "resources/lists/up-to-4-letter-z-words.txt"
    "resources/lists/up-to-5-letter-q-words.txt"])
 
+(defn grab-words [path]
+  (str/split-lines (slurp path)))
+
 (def words-of-interest
-  (set (flatten (map (comp str/split-lines slurp)
-                     files-of-interest))))
+  (set (flatten (map grab-words files-of-interest))))
 
 (deftest test-get-words-of-interest
   (is (> (count words-of-interest) 1500)))
@@ -92,6 +94,20 @@
   (is (subword? "lelh" "hello world"))
   (is (not (subword? "ab" "cat")))
   (is (not (subword? "aa" "cat"))))
+
+;; find all sub-anagrams in string
+
+(defn sub-anagrams [super-word word-pool]
+  (filter (fn [w] (subword? w super-word))
+          word-pool))
+
+(deftest
+  test-find-sub-anagrams
+  (let [pool words-of-interest]
+    (is (= (set (sub-anagrams "cat" pool))
+           #{"ta" "act" "at" "cat"}))
+    (is (= 31 (count (sub-anagrams "stephen" pool))))
+    (is (= 72 (count (sub-anagrams "elizabeth" pool))))))
 
 ;; main
 
