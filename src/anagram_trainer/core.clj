@@ -1,21 +1,31 @@
 (ns anagram-trainer.core
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str])
+  (:use [clojure.test]))
 
-(def dict "/Users/thanthese/scrabble-lists/OWL2.txt")
+;; get words
 
+(def dict "resources/dict/OWL2.txt")
 
+(def files-of-interest
+  ["resources/lists/2-letter-words.txt"
+   "resources/lists/3-letter-words.txt"
+   "resources/lists/4-letters-3-vowels.txt"
+   "resources/lists/5-letters-4-vowels.txt"
+   "resources/lists/all-consts.txt"
+   "resources/lists/q-words-no-qu.txt"
+   "resources/lists/up-to-4-letter-j-words.txt"
+   "resources/lists/up-to-4-letter-x-words.txt"
+   "resources/lists/up-to-4-letter-z-words.txt"
+   "resources/lists/up-to-5-letter-q-words.txt"])
 
-(def j "/Users/thanthese/scrabble-lists/up-to-4-letter-j-words.txt")
-(def x "/Users/thanthese/scrabble-lists/up-to-4-letter-x-words.txt")
-(def z "/Users/thanthese/scrabble-lists/up-to-4-letter-z-words.txt")
-(def q "/Users/thanthese/scrabble-lists/up-to-5-letter-q-words.txt")
-(def u "/Users/thanthese/scrabble-lists/q-words-no-qu.txt")
-(def t "/Users/thanthese/scrabble-lists/2-letter-words.txt")
-(def r "/Users/thanthese/scrabble-lists/3-letter-words.txt")
+(def words-of-interest
+  (set (flatten (map (comp str/split-lines slurp)
+                     files-of-interest))))
 
-(defn grab-words [path] (str/split-lines (slurp path)))
+(deftest test-get-words-of-interest
+  (is (> (count words-of-interest) 1500)))
 
-(def words-of-interest (set (flatten (map grab-words [j x z q u t r]))))
+;; find anagrams
 
 (defn anagrams
   "Return lists of words that are anagrams of each other."
@@ -27,6 +37,13 @@
                         {}
                         words))))
 
+(deftest test-anagrams
+  (let [as (anagrams ["aa" "ab" "ba" "cab" "bac" "bca"])]
+    (is (= (set (map set as))
+           #{#{"bca" "bac" "cab"} #{"ba" "ab"}}))))
+
+
+;; main
+
 (defn -main [& args]
-  (println (anagrams words-of-interest))
-  (println (grab-words "resources/lists/2-letter-words.txt")))
+  (println (anagrams words-of-interest)))
