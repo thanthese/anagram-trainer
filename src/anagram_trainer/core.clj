@@ -27,6 +27,8 @@
 
 ;; find anagrams
 
+(def sort-word (comp str/join sort))
+
 (defn register-word [m word]
   (let [k (str/join (sort word))]
     (assoc m k (cons word (m k)))))
@@ -39,18 +41,38 @@
           (vals (anagram-map words))))
 
 (deftest
+  test-sort-word
+  (is (= (sort-word "dcba") "abcd")))
+
+(deftest
   test-anagrammap
   (let [m (anagram-map ["aa" "ab" "ba" "cab" "bac" "bca"])]
-    (is (= (get m "aa")
-           ["aa"]))
-    (is (= (set (get m "ab"))
-           #{"ab" "ba"}))))
+    (is (= (m "aa") ["aa"]))
+    (is (= (set (m "ab")) #{"ab" "ba"}))))
 
 (deftest
   test-anagrams
   (let [as (anagrams ["aa" "ab" "ba" "cab" "bac" "bca"])]
     (is (= (set (map set as))
            #{#{"bca" "bac" "cab"} #{"ba" "ab"}}))))
+
+;; add words
+
+(defn add-words [words]
+  (let [freqs (apply merge-with max (map frequencies words))
+        pretty (comp str/join sort flatten)]
+    (pretty (for [[ch n] freqs]
+              (repeat n ch)))))
+
+(deftest
+  test-add-words
+  (is (= (add-words ["ab" "cd"]) "abcd"))
+  (is (= (add-words ["ab" "ad"]) "abd"))
+  (is (= (add-words ["ab" "aa"]) "aab"))
+  (is (= (add-words ["aa" "ab"]) "aab"))
+  (is (= (add-words ["aa" "aa"]) "aa"))
+  (is (= (add-words ["hello" "world"]) "dehllorw"))
+  (is (= (add-words ["six" "sick" "sheep"]) "ceehikpsx")))
 
 ;; main
 
