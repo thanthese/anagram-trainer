@@ -74,6 +74,25 @@
   (is (= (add-words ["hello" "world"]) "dehllorw"))
   (is (= (add-words ["six" "sick" "sheep"]) "ceehikpsx")))
 
+;; word is in word
+
+(defn subword? [sub sup]
+  (let [freq-sub (frequencies sub)
+        freq-sup (frequencies sup)]
+    (every? (fn [[ch n]]
+              (<= n (get freq-sup ch 0)))
+            freq-sub)))
+
+(deftest
+  test-subword?
+  (is (subword? "ab" "bat"))
+  (is (subword? "aba" "bata"))
+  (is (subword? "a" "bata"))
+  (is (subword? "hell" "hello world"))
+  (is (subword? "lelh" "hello world"))
+  (is (not (subword? "ab" "cat")))
+  (is (not (subword? "aa" "cat"))))
+
 ;; main
 
 (defn -main [& args]
