@@ -2,6 +2,15 @@
   (:require [clojure.string :as str])
   (:use [clojure.test]))
 
+;; "testing framework"
+
+(defmacro fact [before _ after]
+  `(is (= ~before ~after)))
+
+(deftest
+  who-tests-the-testers?
+  (fact (+ 1 2) => 3))
+
 ;; get words
 
 (def dict "resources/dict/OWL2.txt")
@@ -44,19 +53,20 @@
 
 (deftest
   test-sort-word
-  (is (= (sort-word "dcba") "abcd")))
+  (fact (sort-word "dcba") => "abcd"))
 
 (deftest
   test-anagrammap
   (let [m (anagram-map ["aa" "ab" "ba" "cab" "bac" "bca"])]
-    (is (= (m "aa") ["aa"]))
-    (is (= (set (m "ab")) #{"ab" "ba"}))))
+    (fact (m "aa") => ["aa"])
+    (fact (set (m "ab")) => #{"ab" "ba"})))
 
 (deftest
   test-anagrams
   (let [as (anagrams ["aa" "ab" "ba" "cab" "bac" "bca"])]
-    (is (= (set (map set as))
-           #{#{"bca" "bac" "cab"} #{"ba" "ab"}}))))
+    (fact (set (map set as))
+          =>
+          #{#{"bca" "bac" "cab"} #{"ba" "ab"}})))
 
 ;; add words
 
@@ -68,13 +78,13 @@
 
 (deftest
   test-add-words
-  (is (= (add-words ["ab" "cd"]) "abcd"))
-  (is (= (add-words ["ab" "ad"]) "abd"))
-  (is (= (add-words ["ab" "aa"]) "aab"))
-  (is (= (add-words ["aa" "ab"]) "aab"))
-  (is (= (add-words ["aa" "aa"]) "aa"))
-  (is (= (add-words ["hello" "world"]) "dehllorw"))
-  (is (= (add-words ["six" "sick" "sheep"]) "ceehikpsx")))
+  (fact (add-words ["ab" "cd"]) => "abcd")
+  (fact (add-words ["ab" "ad"]) => "abd")
+  (fact (add-words ["ab" "aa"]) => "aab")
+  (fact (add-words ["aa" "ab"]) => "aab")
+  (fact (add-words ["aa" "aa"]) => "aa")
+  (fact (add-words ["hello" "world"]) => "dehllorw")
+  (fact (add-words ["six" "sick" "sheep"]) => "ceehikpsx"))
 
 ;; word is in word
 
@@ -104,12 +114,34 @@
 (deftest
   test-find-sub-anagrams
   (let [pool words-of-interest]
-    (is (= (set (sub-anagrams "cat" pool))
-           #{"ta" "act" "at" "cat"}))
-    (is (= 31 (count (sub-anagrams "stephen" pool))))
-    (is (= 72 (count (sub-anagrams "elizabeth" pool))))))
+    (fact (set (sub-anagrams "cat" pool))
+          =>
+           #{"ta" "act" "at" "cat"})
+    (fact (count (sub-anagrams "stephen" pool)) => 31)
+    (fact (count (sub-anagrams "elizabeth" pool)) => 72)))
 
 ;; main
 
 (defn -main [& args]
   (println (anagrams words-of-interest)))
+
+;; test states
+
+(defn random-current-state []
+  (for [w words-of-interest]
+    {:word w :score (first (shuffle (range -100 101)))}))
+
+(defn small-current-state []
+  [{:word "tar" :score 0}
+   {:word "end" :score 1}
+   {:word "red" :score 2}
+   {:word "big" :score 3}])
+
+;; pick words
+
+(defn next-letters [state]
+  (add-words (map :word (take 2 (sort-by :score state)))))
+
+(deftest
+  test-next-letters
+  (fact (next-letters (small-current-state)) => "adenrt"))
