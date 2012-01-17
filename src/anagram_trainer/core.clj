@@ -145,3 +145,34 @@
 (deftest
   test-next-letters
   (fact (next-letters (small-current-state)) => "adenrt"))
+
+;; adjust score
+
+(defn match [op words state]
+  (map
+    (fn [entry]
+      (if (some (partial = (:word entry)) words)
+        (update-in entry [:score] op)
+        entry))
+    state))
+
+(def got     (partial match inc))
+(def not-got (partial match dec))
+
+(deftest
+  test-got
+  (fact (set (got ["tar" "big"] (small-current-state)))
+        =>
+        #{{:word "tar" :score 1}
+          {:word "end" :score 1}
+          {:word "red" :score 2}
+          {:word "big" :score 4}}))
+
+(deftest
+  test-not-got
+  (fact (set (not-got ["tar" "big"] (small-current-state)))
+        =>
+        #{{:word "tar" :score -1}
+          {:word "end" :score 1}
+          {:word "red" :score 2}
+          {:word "big" :score 2}}))
