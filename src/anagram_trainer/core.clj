@@ -1,5 +1,6 @@
 (ns anagram-trainer.core
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str])
+  (:import [java.io File]))
 
 ;; word sources
 
@@ -138,3 +139,24 @@
   "Opposite of 'got'."
   [words state]
   (match dec words state))
+
+;; persistence
+
+(defn initial-state
+  "What the state is initialized to if no store is found."
+  []
+  (for [w words-of-interest]
+    {:word w :score 0}))
+
+(defn read-store
+  "Return state as saved in save-path.  If no such file exists, return an
+  initial, default state."
+  [save-path]
+  (if (.exists (File. save-path))
+    (read-string (slurp save-path))
+    (initial-state)))
+
+(defn write-store
+  "Write state to store."
+  [save-path state]
+  (spit save-path state))

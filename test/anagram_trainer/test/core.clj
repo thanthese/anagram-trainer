@@ -1,6 +1,7 @@
 (ns anagram-trainer.test.core
   (:use [anagram-trainer.core])
-  (:use [clojure.test]))
+  (:use [clojure.test])
+  (:require [clojure.java.io :as io]))
 
 ;; word sources
 
@@ -99,3 +100,29 @@
   (is (= (distance-from 20 10) 10))
   (is (= (distance-from 20 30) 10))
   (is (= (distance-from 20 -5) 25)))
+
+;; persistence
+
+(def test-store-path "/sandbox/test.clj")
+
+(deftest
+  test-initial-store
+  (let [store (initial-state)]
+    (is (> (count store) 1500))
+    (is (= (first store)
+           {:word "aa" :score 0}))
+    (is (= 0 (apply + (map :score store))))))
+
+(deftest
+  test-read-store-returns-initial-state-when-no-file-is-found
+  (do
+    (io/delete-file test-store-path :silently)
+    (is (= (read-store test-store-path)
+         (initial-state)))))
+
+(deftest
+  test-write-store
+  (let [state (small-current-state)]
+    (do
+      (write-store test-store-path state)
+      (is (= state (read-store test-store-path))))))
