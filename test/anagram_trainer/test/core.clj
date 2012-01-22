@@ -2,14 +2,12 @@
   (:use [anagram-trainer.core])
   (:use [clojure.test]))
 
-(defn small-current-state []
-  [{:word "tar" :score 0}
-   {:word "end" :score 1}
-   {:word "red" :score 2}
-   {:word "big" :score 3}])
+;; word sources
 
 (deftest test-get-words-of-interest
   (is (> (count words-of-interest) 1500)))
+
+;; anagram utils
 
 (deftest
   test-sort-word
@@ -55,9 +53,29 @@
     (is (= (count (sub-anagrams "stephen" pool)) 31))
     (is (= (count (sub-anagrams "elizabeth" pool)) 72))))
 
+;; related to state
+
+(defn small-current-state []
+  [{:word "tar" :score 0}
+   {:word "end" :score 1}
+   {:word "red" :score 2}
+   {:word "big" :score 3}])
+
+(defn medium-current-state []
+  [{:word "tar" :score 0}
+   {:word "end" :score 1}
+   {:word "red" :score 2}
+   {:word "bed" :score 3}
+   {:word "ned" :score 4}
+   {:word "say" :score -5}
+   {:word "day" :score -6}
+   {:word "ray" :score -7}
+   {:word "may" :score -8}
+   {:word "hex" :score -9}])
+
 (deftest
-  test-next-letters
-  (is (= (next-letters (small-current-state)) "adenrt")))
+  test-optimal-rack
+  (is (= (optimal-rack (medium-current-state) 20 5) "amry")))
 
 (deftest
   test-got
@@ -74,3 +92,10 @@
            {:word "end" :score 1}
            {:word "red" :score 2}
            {:word "big" :score 2}})))
+
+(deftest
+  test-distance-from
+  (is (= (distance-from 20 20) 0))
+  (is (= (distance-from 20 10) 10))
+  (is (= (distance-from 20 30) 10))
+  (is (= (distance-from 20 -5) 25)))
