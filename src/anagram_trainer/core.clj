@@ -1,6 +1,5 @@
 (ns anagram-trainer.core
-  (:require [clojure.string :as str])
-  (:use [clojure.test]))
+  (:require [clojure.string :as str]))
 
 ;; get words
 
@@ -24,9 +23,6 @@
 (def words-of-interest
   (set (flatten (map grab-words files-of-interest))))
 
-(deftest test-get-words-of-interest
-  (is (> (count words-of-interest) 1500)))
-
 ;; find anagrams
 
 (def sort-word (comp str/join sort))
@@ -42,22 +38,6 @@
   (filter (fn [ls] (> (count ls) 1))
           (vals (anagram-map words))))
 
-(deftest
-  test-sort-word
-  (is (= (sort-word "dcba") "abcd")))
-
-(deftest
-  test-anagrammap
-  (let [m (anagram-map ["aa" "ab" "ba" "cab" "bac" "bca"])]
-    (is (= (m "aa") ["aa"]))
-    (is (= (set (m "ab")) #{"ab" "ba"}))))
-
-(deftest
-  test-anagrams
-  (let [as (anagrams ["aa" "ab" "ba" "cab" "bac" "bca"])]
-    (is (= (set (map set as))
-           #{#{"bca" "bac" "cab"} #{"ba" "ab"}}))))
-
 ;; add words
 
 (defn add-words [words]
@@ -65,16 +45,6 @@
         pretty (comp str/join sort flatten)]
     (pretty (for [[ch n] freqs]
               (repeat n ch)))))
-
-(deftest
-  test-add-words
-  (is (= (add-words ["ab" "cd"]) "abcd"))
-  (is (= (add-words ["ab" "ad"]) "abd"))
-  (is (= (add-words ["ab" "aa"]) "aab"))
-  (is (= (add-words ["aa" "ab"]) "aab"))
-  (is (= (add-words ["aa" "aa"]) "aa"))
-  (is (= (add-words ["hello" "world"]) "dehllorw"))
-  (is (= (add-words ["six" "sick" "sheep"]) "ceehikpsx")))
 
 ;; word is in word
 
@@ -85,29 +55,11 @@
               (<= n (get freq-sup ch 0)))
             freq-sub)))
 
-(deftest
-  test-subword?
-  (is (subword? "ab" "bat"))
-  (is (subword? "aba" "bata"))
-  (is (subword? "a" "bata"))
-  (is (subword? "hell" "hello world"))
-  (is (subword? "lelh" "hello world"))
-  (is (not (subword? "ab" "cat")))
-  (is (not (subword? "aa" "cat"))))
-
 ;; find all sub-anagrams in string
 
 (defn sub-anagrams [super-word word-pool]
   (filter (fn [w] (subword? w super-word))
           word-pool))
-
-(deftest
-  test-find-sub-anagrams
-  (let [pool words-of-interest]
-    (is (= (set (sub-anagrams "cat" pool))
-           #{"ta" "act" "at" "cat"}))
-    (is (= (count (sub-anagrams "stephen" pool)) 31))
-    (is (= (count (sub-anagrams "elizabeth" pool)) 72))))
 
 ;; main
 
@@ -131,10 +83,6 @@
 (defn next-letters [state]
   (add-words (map :word (take 2 (sort-by :score state)))))
 
-(deftest
-  test-next-letters
-  (is (= (next-letters (small-current-state)) "adenrt")))
-
 ;; adjust score
 
 (defn match [op words state]
@@ -147,19 +95,3 @@
 
 (def got     (partial match inc))
 (def not-got (partial match dec))
-
-(deftest
-  test-got
-  (is (= (set (got ["tar" "big"] (small-current-state)))
-         #{{:word "tar" :score 1}
-           {:word "end" :score 1}
-           {:word "red" :score 2}
-           {:word "big" :score 4}})))
-
-(deftest
-  test-not-got
-  (is (= (set (not-got ["tar" "big"] (small-current-state)))
-         #{{:word "tar" :score -1}
-           {:word "end" :score 1}
-           {:word "red" :score 2}
-           {:word "big" :score 2}})))
