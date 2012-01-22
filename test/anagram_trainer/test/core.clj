@@ -2,6 +2,12 @@
   (:use [anagram-trainer.core])
   (:use [clojure.test]))
 
+(defn small-current-state []
+  [{:word "tar" :score 0}
+   {:word "end" :score 1}
+   {:word "red" :score 2}
+   {:word "big" :score 3}])
+
 (deftest test-get-words-of-interest
   (is (> (count words-of-interest) 1500)))
 

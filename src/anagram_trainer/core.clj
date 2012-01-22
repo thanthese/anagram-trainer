@@ -66,18 +66,6 @@
 (defn -main [& args]
   (println (anagrams words-of-interest)))
 
-;; test states
-
-(defn random-current-state []
-  (for [w words-of-interest]
-    {:word w :score (first (shuffle (range -100 101)))}))
-
-(defn small-current-state []
-  [{:word "tar" :score 0}
-   {:word "end" :score 1}
-   {:word "red" :score 2}
-   {:word "big" :score 3}])
-
 ;; pick words
 
 (defn next-letters [state]
